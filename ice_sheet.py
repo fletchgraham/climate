@@ -21,6 +21,11 @@ fig, ax = plt.subplots(figsize=(5, 3))
 ax.set_ylim(-10, 4000)
 line = ax.plot(elevations, lw=2)[0]
 
+def init_func():
+    '''reset the elevations and flows'''
+    elevations[:] = 0
+    flows[:] = 0
+
 def update(i):
 
     # update flows
@@ -37,7 +42,14 @@ def update(i):
     ax.set_title(f'Years: {i * time_step}')
     line.set_ydata(elevations) # update line
 
-anim = FuncAnimation(fig, update, interval=10, frames=steps)
+# tell matplotlib to animate
+anim = FuncAnimation(
+    fig,
+    update,
+    init_func=init_func,
+    interval=10,
+    frames=steps
+)
  
 plt.draw()
 plt.show()
