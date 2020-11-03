@@ -105,7 +105,7 @@ def animStep():
 
     # Time Loop
     for it in range(0,ntAnim):
-
+        pass
     # Here is where you need to build some code
     
         # Encode Longitudinal Derivatives Here
