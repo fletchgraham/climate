@@ -19,7 +19,7 @@ import math
 ncol = 3         # grid size (number of cells)
 nrow = ncol
 
-nSlices = 2         # maximum number of frames to show in the plot
+nSlices = 100         # maximum number of frames to show in the plot
 ntAnim = 1          # number of time steps for each frame
 
 horizontalWrap = True # determines whether the flow wraps around, connecting
@@ -135,18 +135,44 @@ def animStep():
             for j in range(ncol):
                 dHdY[i,j] = (H[i, j] - H[i-1, j]) / dX
 
+        # dVdY
+        for i in range(nrow):
+            for j in range(ncol):
+                dVdY[i,j] = (V[i, j] - V[i, j-1]) / dX
+
         # Calculate the Rotational Terms Here
         for i in range(nrow):
             for j in range(ncol):
                 rotU[i,j] = rotConst[i] * U[i,j]
-                rotV[i,j] = rotConst[i] * U[i,j]
-
+                rotV[i,j] = rotConst[i] * V[i,j]
 
         # Assemble the Time Derivatives Here
+        for i in range(nrow):
+            for j in range(ncol):
+                dUdT[i,j] = rotConst[i] * V[i,j] - flowConst * dHdX[i,j] - dragConst * U[i,j] + windU[j]
+                dVdT[i,j] = -rotConst[i] * U[i,j] - flowConst * dHdY[i,j] - dragConst * V[i,j]
+                dHdT[i,j] = -(dUdX[i,j] + dVdY[i,j]) * HBackground / dX
 
         # Step Forward One Time Step
+
+        for i in range(nrow):
+            for j in range(ncol):
+                U[i,j] += dUdT[i,j] * dT
+                V[i,j] += dVdT[i,j] * dT
+                H[i,j] += dHdT[i,j] * dT
     
         # Update the Boundary and Ghost Cells
+
+        # velocities at the north edge should be zeroed
+        V[0,:] = 0
+
+        # handle wrapping
+        if horizontalWrap:
+            U[:,ncol] = U[:,0] # numpy arrays allow this syntax
+            H[:,ncol] = H[:,0] 
+        else:
+            U[:,0] = 0
+            U[:,ncol] = 0
 
 #   Now you're done
 
@@ -198,7 +224,7 @@ def updateFrame():
     print("Time: ", math.floor( itGlobal * dT / 86400.*10)/10, "days")
 
 def textDump():
-    print("time step ", itGlobal)    
+    print(f"########### TIME STEP {itGlobal} ###########")    
     print("H")
     print(H)
     print("dHdX" )
