@@ -33,7 +33,7 @@ rotationScheme = "PlusMinus"   # "WithLatitude", "PlusMinus", "Uniform"
 
 windScheme = ""  # "Curled", "Uniform"
 initialPerturbation = "Tower"    # "Tower", "NSGradient", "EWGradient"
-textOutput = False
+textOutput = True
 plotOutput = True
 arrowScale = 30
 
@@ -109,10 +109,38 @@ def animStep():
     # Here is where you need to build some code
     
         # Encode Longitudinal Derivatives Here
+
+        # calculate dH/dX
+        for i in range(nrow):
+            for j in range(ncol):
+                dHdX[i,j] = (H[i, j] - H[i, j-1]) / dX
+
+        # handle wrapping
+        if horizontalWrap:
+            U[:,ncol] = U[:,0] # numpy arrays allow this syntax
+            H[:,ncol] = H[:,0] 
+        else:
+            U[:,0] = 0
+            U[:,ncol] = 0
+
+        # calculate dUdX
+        for i in range(nrow):
+            for j in range(ncol):
+                dUdX[i,j] = (U[i, j] - U[i, j-1]) / dX
     
         # Encode Latitudinal Derivatives Here
 
+        # dHdY
+        for i in range(nrow):
+            for j in range(ncol):
+                dHdY[i,j] = (H[i, j] - H[i-1, j]) / dX
+
         # Calculate the Rotational Terms Here
+        for i in range(nrow):
+            for j in range(ncol):
+                rotU[i,j] = rotConst[i] * U[i,j]
+                rotV[i,j] = rotConst[i] * U[i,j]
+
 
         # Assemble the Time Derivatives Here
 
@@ -171,12 +199,13 @@ def updateFrame():
 
 def textDump():
     print("time step ", itGlobal)    
-    print("H", H)
+    print("H")
+    print(H)
     print("dHdX" )
     print( dHdX)
     print("dHdY" )
     print( dHdY)
-    print("U" )
+    print("U")
     print( U)
     print("dUdX" )
     print( dUdX)
