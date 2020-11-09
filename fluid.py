@@ -1,4 +1,8 @@
-"""A simplified fluid sim to wrap my brain around the shallow water assignment"""
+"""A simplified fluid sim to wrap my brain around the shallow water assignment
+
+algo inspo:
+https://web.archive.org/web/20160418004149/http://freespace.virgin.net/hugo.elias/graphics/x_water.htm
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
